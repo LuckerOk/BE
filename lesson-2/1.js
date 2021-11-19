@@ -55,6 +55,14 @@ const validate = (fields, isSingle = true) => {
     }
 }
 
+const setTimer = (interval, delayFunction, delay) => {
+    return interval ? setInterval(delayFunction, delay) : setTimeout(delayFunction, delay);
+};
+
+const clearTimer = (interval, timerId) => {
+    interval ? clearInterval(timerId) : clearTimeout(timerId);
+};
+
 class TimersManager {
     constructor() {
         this.timers = [];
@@ -88,7 +96,7 @@ class TimersManager {
             const { interval, name: timerName } = data;
 
             if (name === timerName) {
-                interval ? clearInterval(timerId) : clearTimeout(timerId);
+                clearTimer(interval, timerId);
             }
 
             return name !== timerName;
@@ -102,7 +110,7 @@ class TimersManager {
 
             const delayFunction = () => job(...params);
 
-            const timerId = interval ? setInterval(delayFunction, delay) : setTimeout(delayFunction, delay);
+            const timerId = setTimer(interval, delayFunction, delay);
 
             return { ...timer, isStart: true, timerId };
         });
@@ -112,7 +120,7 @@ class TimersManager {
         this.timers = this.timers.map((timer) => {
             const { data, timerId } = timer;
 
-            data.interval ? clearInterval(timerId) : clearTimeout(timerId);
+            clearTimer(data.interval, timerId);
 
             return { ...timer, isStart: false, timerId: null };
         });
@@ -129,7 +137,7 @@ class TimersManager {
                 return timer;
             }
 
-            interval ? clearInterval(timerId) : clearTimeout(timerId);
+            clearTimer(interval, timerId);
 
             return { ...timer, isStart: false, timerId: null };
         });
@@ -146,7 +154,7 @@ class TimersManager {
 
             const delayFunction = () => job(...params);
 
-            const timerId = interval ? setInterval(delayFunction, delay) : setTimeout(delayFunction, delay);
+            const timerId = setTimer(interval, delayFunction, delay);
 
             return { ...timer, isStart: true, timerId };
         });

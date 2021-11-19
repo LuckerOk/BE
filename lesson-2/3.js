@@ -33,7 +33,7 @@ const validateByValue = ({ title, value }) => {
       throw Error(`${title} should be more or equal than ${less}`);
     }
   }
-}
+};
 
 const validate = (fields, isSingle = true) => {
   if (isSingle) {
@@ -53,7 +53,7 @@ const validate = (fields, isSingle = true) => {
       validateByValue({ title, value: fields[title] });
     });
   }
-}
+};
 
 const setTimer = (interval, delayFunction, delay) => {
   return interval ? setInterval(delayFunction, delay) : setTimeout(delayFunction, delay);
@@ -61,6 +61,35 @@ const setTimer = (interval, delayFunction, delay) => {
 
 const clearTimer = (interval, timerId) => {
   interval ? clearInterval(timerId) : clearTimeout(timerId);
+};
+
+const delayFunctionHandler = (name, job, params) => {
+  let res;
+  let error;
+  try {
+    res = job(...params);
+  } catch (err) {
+    const { name, message, stack } = err;
+
+    error = {
+      name,
+      message,
+      stack,
+    }
+  }
+
+  const logObj = {
+    name,
+    in: params,
+    out: res,
+    created: new Date().toISOString(),
+  }
+
+  if (error) {
+    logObj.error = error
+  }
+
+  return logObj;
 };
 
 class TimersManager {
@@ -114,14 +143,9 @@ class TimersManager {
       const { name, delay, job, interval } = data;
 
       const delayFunction = () => {
-        const res = job(...params);
+        const logObj = delayFunctionHandler(name, job, params);
 
-        this._log({
-          name,
-          in: params,
-          out: res,
-          created: new Date().toISOString(),
-        });
+        this._log(logObj);
       };
 
       const timerId = setTimer(interval, delayFunction, delay);
@@ -167,14 +191,9 @@ class TimersManager {
       }
 
       const delayFunction = () => {
-        const res = job(...params);
+        const logObj = delayFunctionHandler(name, job, params);
 
-        this._log({
-          name,
-          in: params,
-          out: res,
-          created: new Date().toISOString(),
-        });
+        this._log(logObj);
       };
 
       const timerId = setTimer(interval, delayFunction, delay);
@@ -189,14 +208,30 @@ class TimersManager {
 }
 
 const manager = new TimersManager();
-
 const t1 = {
   name: 't1',
   delay: 1000,
   interval: false,
   job: (a, b) => a + b
 };
-
-manager.add(t1, 1, 2);
+const t2 = {
+  name: 't2',
+  delay: 1000,
+  interval: false,
+  job: () => {
+    throw new Error('We have a problem!');
+  }
+};
+const t3 = {
+  name: 't3',
+  delay: 1000,
+  interval: false,
+  job: n => n
+};
+manager.add(t1, 1, 2) // 3
+manager.add(t2); // undefined
+manager.add(t3, 1); // 1
 manager.start();
-setTimeout(() => manager.print(), 2000);
+setTimeout(() => {
+  manager.print();
+}, 2000);
