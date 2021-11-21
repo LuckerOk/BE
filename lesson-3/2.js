@@ -42,6 +42,17 @@ class Bank extends EventEmitter{
 
       contractor.balance -= withdrawal
     });
+    this.on('send', (firstId, secondId, price) => {
+      this.#validatePrice(price);
+      this.#validateIsExistContractor(firstId);
+      this.#validateIsExistContractor(secondId);
+
+      const firstContractorIndex = this.#contractors.findIndex((contractor) => contractor.id === firstId);
+      const secondContractorIndex = this.#contractors.findIndex((contractor) => contractor.id === secondId);
+
+      this.#contractors[secondContractorIndex].balance += price;
+      this.#contractors[firstContractorIndex].balance -= price;
+    });
     this.on('error', (error) => {
       throw Error(error)
     });
@@ -94,16 +105,16 @@ class Bank extends EventEmitter{
 
 const bank = new Bank();
 
-const personId = bank.register({
+const personFirstId = bank.register({
   name: 'Pitter Black',
   balance: 100
 });
-
-bank.emit('add', personId, 200);
-bank.emit('get', personId, (balance) => {
-  console.log(`I have ${balance}₴`); // I have 120₴
+const personSecondId = bank.register({
+  name: 'Oliver White',
+  balance: 700
 });
-bank.emit('withdraw', personId, 310);
-// bank.emit('get', personId, (balance) => {
-//   console.log(`I have ${balance}₴`); // I have 70₴
-// });
+
+bank.emit('send', personFirstId, personSecondId, 50);
+bank.emit('get', personSecondId, (balance) => {
+  console.log(`I have ${balance}₴`); // I have 750₴
+});
