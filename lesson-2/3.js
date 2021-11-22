@@ -19,118 +19,116 @@ const REQUIRED_FIELDS = {
   },
 };
 
-const validateByValue = ({ title, value }) => {
-  const { type, more, less } = REQUIRED_FIELDS[title];
+class TimersManager {
+  #timers = [];
+  #logs = [];
 
-  if (typeof value !== type) {
-    throw Error(`Incorrect type of the ${title}`);
+  #setTimer(interval, delayFunction, delay) {
+    return interval ? setInterval(delayFunction, delay) : setTimeout(delayFunction, delay);
   }
-  if (title === 'delay') {
-    if (value > more) {
-      throw Error(`${title} should be less or equal than ${more}`);
-    }
-    if (value < less) {
-      throw Error(`${title} should be more or equal than ${less}`);
-    }
+
+  #clearTimer(interval, timerId) {
+    interval ? clearInterval(timerId) : clearTimeout(timerId);
   }
-};
 
-const validate = (fields, isSingle = true) => {
-  if (isSingle) {
-    const { title, value } = fields;
+  #log(log) {
+    this.#logs.push(log);
+  }
 
-    if (!value) {
-      throw Error(`Missing ${title}`);
+  #validateByValue = ({ title, value }) => {
+    const { type, more, less } = REQUIRED_FIELDS[title];
+
+    if (typeof value !== type) {
+      throw Error(`Incorrect type of the ${title}`);
     }
+    if (title === 'delay') {
+      if (value > more) {
+        throw Error(`${title} should be less or equal than ${more}`);
+      }
+      if (value < less) {
+        throw Error(`${title} should be more or equal than ${less}`);
+      }
+    }
+  };
 
-    validateByValue(fields);
-  } else {
-    Object.values(REQUIRED_FIELDS).forEach(({ title, type, more, less }) => {
-      if (!fields.hasOwnProperty(title)) {
+  #validate = (fields, isSingle = true) => {
+    if (isSingle) {
+      const { title, value } = fields;
+
+      if (!value) {
         throw Error(`Missing ${title}`);
       }
 
-      validateByValue({ title, value: fields[title] });
-    });
-  }
-};
+      this.#validateByValue(fields);
+    } else {
+      Object.values(REQUIRED_FIELDS).forEach(({ title }) => {
+        if (!fields.hasOwnProperty(title)) {
+          throw Error(`Missing ${title}`);
+        }
 
-const setTimer = (interval, delayFunction, delay) => {
-  return interval ? setInterval(delayFunction, delay) : setTimeout(delayFunction, delay);
-};
-
-const clearTimer = (interval, timerId) => {
-  interval ? clearInterval(timerId) : clearTimeout(timerId);
-};
-
-const delayFunctionHandler = (name, job, params) => {
-  let res;
-  let error;
-  try {
-    res = job(...params);
-  } catch (err) {
-    const { name, message, stack } = err;
-
-    error = {
-      name,
-      message,
-      stack,
+        this.#validateByValue({ title, value: fields[title] });
+      });
     }
-  }
+  };
 
-  const logObj = {
-    name,
-    in: params,
-    out: res,
-    created: new Date().toISOString(),
-  }
+  #delayFunctionHandler = (name, job, params) => {
+    let res;
+    let error;
+    try {
+      res = job(...params);
+    } catch (err) {
+      const { name, message, stack } = err;
 
-  if (error) {
-    logObj.error = error
-  }
+      error = {
+        name,
+        message,
+        stack,
+      }
+    }
 
-  return logObj;
-};
+    const logObj = {
+      name,
+      in: params,
+      out: res,
+      created: new Date().toISOString(),
+    }
 
-class TimersManager {
-  constructor() {
-    this.timers = [];
-    this.logs = [];
-  }
+    if (error) {
+      logObj.error = error
+    }
 
-  _log(log) {
-    this.logs.push(log);
-  }
+    return logObj;
+  };
 
   add(timer, ...params) {
-    const isStart = this.timers.some((timer) => timer.isStart);
+    const isStart = this.#timers.some((timer) => timer.timerId);
 
     if (isStart) {
       throw Error('Timer is started');
     }
 
-    const currentTimer = this.timers.find((timerItem) => timerItem.data.name === timer.name);
+    const currentTimer = this.#timers.find((timerItem) => timerItem.data.name === timer.name);
 
     if (currentTimer) {
       throw Error('Timer is already exist');
     }
 
-    validate(timer, false)
+    this.#validate(timer, false)
 
-    this.timers.push({ data: timer, params, isStart: false, timerId: null });
+    this.#timers.push({ data: timer, params, timerId: null });
 
     return this;
   }
 
   remove(name) {
-    validate({ title: 'name', value: name });
+    this.#validate({ title: 'name', value: name });
 
-    this.timers = this.timers.filter((timer) => {
+    this.#timers = this.#timers.filter((timer) => {
       const { data, timerId } = timer;
       const { interval, name: timerName } = data;
 
       if (name === timerName) {
-        clearTimer(interval, timerId);
+        this.#clearTimer(interval, timerId);
       }
 
       return name !== timerName;
@@ -138,36 +136,36 @@ class TimersManager {
   }
 
   start() {
-    this.timers = this.timers.map((timer) => {
+    this.#timers = this.#timers.map((timer) => {
       const { data, params } = timer;
       const { name, delay, job, interval } = data;
 
       const delayFunction = () => {
-        const logObj = delayFunctionHandler(name, job, params);
+        const logObj = this.#delayFunctionHandler(name, job, params);
 
-        this._log(logObj);
+        this.#log(logObj);
       };
 
-      const timerId = setTimer(interval, delayFunction, delay);
+      const timerId = this.#setTimer(interval, delayFunction, delay);
 
-      return { ...timer, isStart: true, timerId };
+      return { ...timer, timerId };
     });
   }
 
   stop() {
-    this.timers = this.timers.map((timer) => {
+    this.#timers = this.#timers.map((timer) => {
       const { data, timerId } = timer;
 
-      clearTimer(data.interval, timerId);
+      this.#clearTimer(data.interval, timerId);
 
-      return { ...timer, isStart: false, timerId: null };
+      return { ...timer, timerId: null };
     });
   }
 
   pause(name) {
-    validate({ title: 'name', value: name })
+    this.#validate({ title: 'name', value: name })
 
-    this.timers = this.timers.map((timer) => {
+    this.#timers = this.#timers.map((timer) => {
       const { data, timerId } = timer;
       const { interval, name: timerName } = data;
 
@@ -175,14 +173,14 @@ class TimersManager {
         return timer;
       }
 
-      clearTimer(interval, timerId);
+      this.#clearTimer(interval, timerId);
 
-      return { ...timer, isStart: false, timerId: null };
+      return { ...timer, timerId: null };
     });
   }
 
   resume(name) {
-    this.timers = this.timers.map((timer) => {
+    this.#timers = this.#timers.map((timer) => {
       const { data, params } = timer;
       const { interval, job, delay, name: timerName } = data;
 
@@ -191,19 +189,19 @@ class TimersManager {
       }
 
       const delayFunction = () => {
-        const logObj = delayFunctionHandler(name, job, params);
+        const logObj = this.#delayFunctionHandler(name, job, params);
 
-        this._log(logObj);
+        this.#log(logObj);
       };
 
-      const timerId = setTimer(interval, delayFunction, delay);
+      const timerId = this.#setTimer(interval, delayFunction, delay);
 
-      return { ...timer, isStart: true, timerId };
+      return { ...timer, timerId };
     });
   }
 
   print() {
-    return console.log(this.logs);
+    return console.log(this.#logs);
   }
 }
 
