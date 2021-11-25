@@ -14,6 +14,8 @@ class Logger extends Transform {
       payload: chunk,
     });
 
+    this.push(chunk)
+
     done();
   }
 }
