@@ -68,7 +68,7 @@ const validateFields = (fields) => {
 };
 
 const validateEncodedData = (field) => {
-  console.log(field)
+  console.log(validateEncodedData.name, field);
   let countFields = 0;
   const keyLength = Object.keys(REQUIRED_ENCODED_STRUCTURE).length;
 

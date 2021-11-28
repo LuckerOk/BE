@@ -9,7 +9,7 @@ class Guardian extends Transform {
   }
 
   _transform(chunk, encoding, done) {
-    console.log(chunk)
+    console.log(Guardian.name, chunk)
     const encryptedEmail = encrypt(chunk.email, encoding, ALGORITHM);
     const encryptedPassword = encrypt(chunk.password, encoding, ALGORITHM);
 

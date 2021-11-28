@@ -8,7 +8,7 @@ class AccountManager extends Writable {
   }
 
   _write(chunk, encoding, done) {
-    console.log(chunk);
+    console.log(AccountManager.name, chunk);
     this.#data.push(chunk);
 
     done();

@@ -8,7 +8,7 @@ class Decryptor extends Transform {
   }
 
   _transform(chunk, encoding, done) {
-    console.log(chunk)
+    console.log(Decryptor.name, chunk)
     validateEncodedData(chunk);
     const decryptedEmail = decrypt(chunk.payload.email, encoding, chunk.meta.algorithm);
     const decryptedPassword = decrypt(chunk.payload.password, encoding, chunk.meta.algorithm);
