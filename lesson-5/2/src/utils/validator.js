@@ -29,8 +29,12 @@ const REQUIRED_ENCODED_STRUCTURE = {
     },
   },
   meta: {
-    algorithm: {
-      title: 'algorithm',
+    source: {
+      title: 'source',
+      type: 'string',
+    },
+    signature: {
+      title: 'signature',
       type: 'string',
     },
   },
