@@ -2,7 +2,7 @@ const { Transform } = require('stream');
 const { encrypt } = require('./crypto');
 
 class Guardian extends Transform {
-  constructor(options = { objectMode: true }) {
+  constructor(options = {}) {
     super(options);
   }
 

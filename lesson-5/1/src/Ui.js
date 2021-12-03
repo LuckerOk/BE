@@ -1,5 +1,5 @@
 const { Readable } = require('stream');
-const { validateFields } = require('./validator');
+const { validateFields } = require('./utils/validator');
 
 class Ui extends Readable {
   #data = [];

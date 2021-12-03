@@ -1,5 +1,5 @@
 const { Transform } = require('stream');
-const { encrypt } = require('./crypto');
+const { encrypt, signCertificate } = require('./utils/crypto');
 
 const ALGORITHM = 'hex';
 
@@ -12,16 +12,19 @@ class Guardian extends Transform {
     const encryptedEmail = encrypt(chunk.email, encoding, ALGORITHM);
     const encryptedPassword = encrypt(chunk.password, encoding, ALGORITHM);
 
-    this.push({
+    const data = {
       payload: {
         ...chunk,
         email: encryptedEmail,
         password: encryptedPassword,
       },
       meta: {
-        algorithm: ALGORITHM
+        source: 'ui',
       },
-    });
+    }
+    data.meta.signature = signCertificate(data.payload);
+
+    this.push(data);
 
     done();
   }

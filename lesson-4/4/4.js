@@ -11,8 +11,8 @@ const customers = [
   },
 ];
 
-const ui = new Ui(customers);
-const guardian = new Guardian();
-const decryptor = new Decryptor();
-const manager = new AccountManager();
+const ui = new Ui(customers, { objectMode: true });
+const guardian = new Guardian({ objectMode: true });
+const decryptor = new Decryptor({ objectMode: true });
+const manager = new AccountManager({ objectMode: true });
 ui.pipe(guardian).pipe(decryptor).pipe(manager);

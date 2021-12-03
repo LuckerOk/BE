@@ -3,12 +3,11 @@ const { decrypt } = require('./crypto');
 const { validateEncodedData } = require('./validator');
 
 class Decryptor extends Transform {
-  constructor(options = { objectMode: true }) {
+  constructor(options = {}) {
     super(options);
   }
 
   _transform(chunk, encoding, done) {
-    console.log(chunk)
     validateEncodedData(chunk);
     const decryptedEmail = decrypt(chunk.payload.email, encoding, chunk.meta.algorithm);
     const decryptedPassword = decrypt(chunk.payload.password, encoding, chunk.meta.algorithm);

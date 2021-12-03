@@ -1,5 +1,5 @@
 const { Transform } = require('stream');
-const { encrypt } = require('./crypto');
+const { encrypt } = require('./utils/crypto');
 
 const ALGORITHM = 'hex';
 
@@ -19,7 +19,7 @@ class Guardian extends Transform {
         password: encryptedPassword,
       },
       meta: {
-        algorithm: ALGORITHM
+        source: 'ui',
       },
     });
 
