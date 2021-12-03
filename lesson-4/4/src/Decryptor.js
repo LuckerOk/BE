@@ -3,7 +3,7 @@ const { decrypt } = require('./crypto');
 const { validateEncodedData } = require('./validator');
 
 class Decryptor extends Transform {
-  constructor(options = { objectMode: true }) {
+  constructor(options = {}) {
     super(options);
   }
 

@@ -14,7 +14,7 @@ const customers = [
     password: 'owhite_456'
   }
 ];
-const ui = new Ui(customers);
-const guardian = new Guardian();
-const manager = new AccountManager();
+const ui = new Ui(customers, {  objectMode: true  });
+const guardian = new Guardian({  objectMode: true  });
+const manager = new AccountManager({  objectMode: true  });
 ui.pipe(guardian).pipe(manager);

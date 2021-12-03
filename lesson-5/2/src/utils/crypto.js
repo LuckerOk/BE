@@ -3,10 +3,10 @@ const { PRIVATE_KEY, PUBLIC_KAY } = require('../constants/keys');
 
 const algorithm = 'aes-256-cbc';
 const initVector = randomBytes(16);
-const Securitykey = randomBytes(32);
+const securitykey = randomBytes(32);
 
 const encrypt = (data, encoding, format) => {
-  const cipher = createCipheriv(algorithm, Securitykey, initVector);
+  const cipher = createCipheriv(algorithm, securitykey, initVector);
 
   let encryptedData = cipher.update(data, encoding, format);
   encryptedData += cipher.final(format);
@@ -15,7 +15,7 @@ const encrypt = (data, encoding, format) => {
 }
 
 const decrypt = (data, encoding, format) => {
-  const decipher = createDecipheriv(algorithm, Securitykey, initVector);
+  const decipher = createDecipheriv(algorithm, securitykey, initVector);
 
   let decryptedData = decipher.update(data, format, encoding);
   decryptedData += decipher.final(encoding);

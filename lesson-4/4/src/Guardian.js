@@ -4,7 +4,7 @@ const { encrypt } = require('./crypto');
 const ALGORITHM = 'hex';
 
 class Guardian extends Transform {
-  constructor(options = { objectMode: true }) {
+  constructor(options = {}) {
     super(options);
   }
 

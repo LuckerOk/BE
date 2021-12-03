@@ -4,7 +4,7 @@ const DB = require('./DB');
 class Logger extends Transform {
   #db = new DB();
 
-  constructor(options = { objectMode: true }) {
+  constructor(options = {}) {
     super(options);
   }
 

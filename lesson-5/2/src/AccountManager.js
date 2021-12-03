@@ -4,7 +4,7 @@ const { verifySign } = require('./utils/crypto');
 class AccountManager extends Writable {
   #data = [];
 
-  constructor(options = { objectMode: true }) {
+  constructor(options = {}) {
     super(options);
   }
 

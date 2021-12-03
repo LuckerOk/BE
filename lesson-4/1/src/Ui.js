@@ -4,7 +4,7 @@ const validator = require('./validator');
 class Ui extends Readable {
   #data = [];
 
-  constructor(data = [], options = { objectMode: true }) {
+  constructor(data = [], options = {}) {
     super(options);
     validator(data)
     this.#data = data;

@@ -3,7 +3,7 @@ const { Writable } = require('stream');
 class AccountManager extends Writable {
   #data = [];
 
-  constructor(options = { objectMode: true }) {
+  constructor(options = {}) {
     super(options);
   }
 
