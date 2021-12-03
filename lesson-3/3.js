@@ -53,6 +53,7 @@ class Bank extends EventEmitter{
       const firstContractor = this.#contractors[firstContractorIndex];
       const secondContractor = this.#contractors[secondContractorIndex];
 
+      this.#validateWithdrawal(firstContractor, price);
       this.#validateLimit(firstContractor, firstContractor.balance);
 
       secondContractor.balance += price;
@@ -64,7 +65,7 @@ class Bank extends EventEmitter{
       this.#contractors[contractorIndex].limit = cb;
     });
     this.on('error', (error) => {
-      throw Error(error)
+      throw new Error(error)
     });
 
     return this;
