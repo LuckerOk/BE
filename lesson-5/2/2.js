@@ -1,3 +1,4 @@
+const { pipeline } = require('stream');
 const Ui = require('./src/Ui.js');
 const Guardian = require('./src/Guardian.js');
 const AccountManager = require('./src/AccountManager.js');
@@ -17,4 +18,11 @@ const customers = [
 const ui = new Ui(customers, {  objectMode: true  });
 const guardian = new Guardian({  objectMode: true  });
 const manager = new AccountManager({  objectMode: true  });
-ui.pipe(guardian).pipe(manager);
+pipeline(
+  ui,
+  guardian,
+  manager,
+  (err) => {
+    err ? console.log('Pipeline failed.', err) : console.log('Pipeline succeeded.');
+  }
+)

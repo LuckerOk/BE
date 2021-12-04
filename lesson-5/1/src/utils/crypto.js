@@ -1,4 +1,4 @@
-const { randomBytes, createDecipheriv, createCipheriv } = require('lesson-5/1/src/utils/crypto')
+const { randomBytes, createDecipheriv, createCipheriv } = require('crypto')
 
 const algorithm = 'aes-256-cbc';
 const initVector = randomBytes(16);
