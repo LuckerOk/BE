@@ -22,13 +22,14 @@ class Json2csv extends Transform {
     let row = '';
 
     chunk.forEach((item) => {
+      let itemRow = '';
       this.#fields.forEach((field) => {
         const value = item[field];
 
-        row += row ? `;${value}` : `${value}`;
+        itemRow += itemRow ? `;${value}` : `${value}`;
       })
 
-      row += '\n';
+      row += row ? `\n${itemRow}` : `${itemRow}`;
     });
 
     return row;

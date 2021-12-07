@@ -18,17 +18,19 @@ class Json2csv extends Transform {
     return `${columns}\n`;
   }
 
+
   #addRows(chunk) {
     let row = '';
 
     chunk.forEach((item) => {
+      let itemRow = '';
       this.#fields.forEach((field) => {
         const value = item[field];
 
-        row += row ? `;${value}` : `${value}`;
+        itemRow += itemRow ? `;${value}` : `${value}`;
       })
 
-      row += '\n';
+      row += row ? `\n${itemRow}` : `${itemRow}`;
     });
 
     return row;
