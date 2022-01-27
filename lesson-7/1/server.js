@@ -4,11 +4,9 @@ const path = require('path');
 
 const { validateFields } = require('./utils/validator');
 const { findUsers } = require('./utils/users');
+const { PORT } = require('./config');
 
 const server = net.createServer();
-const PORT = process.env.PORT || 8080;
-
-let users = null
 
 server.on('connection', async socket => {
     console.log('New client connected!');
@@ -17,6 +15,10 @@ server.on('connection', async socket => {
         const filterObj = JSON.parse(msg.toString());
 
         validateFields(filterObj);
+
+        const file = await fs.readFile(path.resolve('./data/users.json'), 'utf-8');
+
+        const users = JSON.parse(file);
 
         const resUsers = findUsers(users, filterObj);
 
@@ -30,10 +32,6 @@ server.on('connection', async socket => {
 
 server.on('listening', async () => {
     const { port } = server.address();
-
-    const file = await fs.readFile(path.resolve('./data/users.json'), 'utf-8');
-
-    users = JSON.parse(file);
 
     console.log(`TCP Server started on port ${port}!`);
 });
