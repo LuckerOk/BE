@@ -1,5 +1,7 @@
 const net = require('net');
 
+const { PORT } = require('./config');
+
 const client = new net.Socket();
 
 const FILTER = {
@@ -16,7 +18,7 @@ const FILTER = {
     }
 }
 
-client.connect(8080, async () => {
+client.connect(PORT, async () => {
     console.log('Connected!');
 
     client.write(JSON.stringify(FILTER))

@@ -1,41 +1,17 @@
 const { createServer } = require('net');
 const path = require('path');
-const { createGzip } = require('zlib');
 const fsPromises = require('fs/promises');
-const { createWriteStream } = require('fs');
-const { pipeline } = require('stream/promises');
 
-const Json2csv = require('./src/Json2csv');
+const { PORT } = require('./config');
 const { findUsers } = require('./src/utils/users');
+const { formatToCsv, archive } = require('./src/utils/files');
 const { validateFields, validateMeta } = require('./src/utils/validator');
+const { ENCODING, usersJsonPath, resUsersJsonPath } = require('./src/constants');
 
 const server = createServer();
-const PORT = process.env.PORT || 8080;
-
-const formatToCsv = async (users) => {
-    const json2csv = new Json2csv()
-    const csvData = json2csv.transform(users);
-
-    await fsPromises.writeFile(path.resolve('./src/data/resUsers.csv'), csvData, 'utf-8');
-
-    return fsPromises.readFile(path.resolve('./src/data/resUsers.csv'), 'utf-8');
-}
-
-const archive = async (source) => {
-    const gzip = createGzip();
-    const destination = createWriteStream(path.resolve('./src/data/resUsers.gz'));
-
-    await pipeline(source, gzip, destination);
-
-    return fsPromises.readFile(path.resolve('./src/data/resUsers.gz'), 'utf-8');
-}
 
 server.on('connection', async socket => {
     console.log('New client connected!');
-
-    const file = await fsPromises.readFile(path.resolve('./src/data/users.json'), 'utf-8');
-
-    const users = JSON.parse(file);
 
     socket.on('data', async msg => {
         const filterObj = JSON.parse(msg.toString());
@@ -43,7 +19,11 @@ server.on('connection', async socket => {
         validateFields(filterObj.filter);
         validateMeta(filterObj.meta);
 
-        const { filter, meta: { format: isFormat, archive: isArchive } } = filterObj
+        const { filter, meta: { format: isFormat, archive: isArchive } } = filterObj;
+
+        const file = await fsPromises.readFile(path.resolve(usersJsonPath), ENCODING);
+
+        const users = JSON.parse(file);
 
         const resUsers = findUsers(users, filter);
 
@@ -59,11 +39,9 @@ server.on('connection', async socket => {
             }
         } else {
             if (isArchive) {
-                await fsPromises.writeFile(path.resolve('./src/data/resUsers.json'), JSON.stringify(resUsers), 'utf-8');
+                await fsPromises.writeFile(path.resolve(resUsersJsonPath), JSON.stringify(resUsers), ENCODING);
 
-                const file = await fsPromises.readFile(path.resolve('./src/data/resUsers.json'), 'utf-8');
-
-                const archivedFile = await archive(file);
+                const archivedFile = await archive(JSON.stringify(resUsers));
 
                 socket.write(archivedFile);
             }

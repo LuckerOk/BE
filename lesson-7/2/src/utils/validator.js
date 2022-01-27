@@ -35,22 +35,34 @@ const generateInvalidError = (value) => {
   throw new Error(`The field ${value} is invalid`);
 }
 
+const validateObject = (key, value, requiredField, fn) => {
+  if (Object.keys(value).length) {
+    fn(value, requiredField)
+  } else {
+    generateEmptyObjectError(key);
+  }
+};
+
+const validateField = (key, value, requiredField) => {
+  if (typeof value !== requiredField) {
+    generateTypeError(key);
+  }
+};
+
+const validateRequiredField = (key, value, requiredField, fn) => {
+  if (typeof value === 'object') {
+    validateObject(key, value, requiredField, fn);
+  } else {
+    validateField(key, value, requiredField);
+  }
+}
+
 const validateFields = (fields, schema = REQUIRED_FIELDS) => {
   Object.entries(fields).forEach(([key, value]) => {
     const requiredField = schema[key];
 
     if (requiredField) {
-      if (typeof value === 'object') {
-        if (Object.keys(value).length) {
-          validateFields(value, requiredField)
-        } else {
-          generateEmptyObjectError(key);
-        }
-      } else {
-        if (typeof value !== requiredField) {
-          generateTypeError(key)
-        }
-      }
+      validateRequiredField(key, value, requiredField, validateFields);
     } else {
       generateInvalidError(key);
     }
